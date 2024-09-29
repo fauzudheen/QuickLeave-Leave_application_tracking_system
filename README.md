@@ -21,7 +21,7 @@ QuickLeave is a comprehensive leave tracking and approval system designed to str
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/quickleave.git
+   git clone https://github.com/fauzudheen/QuickLeave-Leave_application_tracking_system.git
    cd quickleave/server
    ```
 
