@@ -105,8 +105,4 @@ QuickLeave is a comprehensive leave tracking and approval system designed to str
    - Confirm that the manager's account has the correct permissions
    - Verify that employees are selecting the correct manager when submitting requests
 
-5. **Email notifications not working**
-   - Check email configuration in the backend settings
-   - Ensure the email service (e.g., SMTP server) is running and accessible
-
 For any other issues, please check the application logs or create an issue in the GitHub repository.
