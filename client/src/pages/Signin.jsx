@@ -10,20 +10,23 @@ const Signin = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
+    const [error, setError] = useState(null)
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = axios.post(`${backendUrl}/signin/`, {
+            const response = await axios.post(`${backendUrl}/signin/`, {
                 username,
                 password
             })
-            console.log("User logged in:", response.data);
             dispatch(setUserSignIn(response.data))
             navigate('/')
         } catch (error) {
+            if (error.response && error.response.data) {
+                setError(error.response.data.error);
+            }
             console.error("Error logging in:", error);
         }
     }
@@ -69,6 +72,13 @@ const Signin = () => {
                         </button>
                     </div>
                 </div>
+
+                {error && (
+                    <div className=" text-red-600 px-4 py-3">
+                        <strong className="font-bold">Error: </strong>
+                        <span className="block sm:inline">{error}</span>
+                    </div>
+                )}
 
                 <button 
                     className="w-full p-2 rounded-md bg-gradient-to-r from-teal-500 to-blue-500 text-white font-medium hover:from-teal-600 hover:to-blue-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500"

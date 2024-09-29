@@ -1,7 +1,10 @@
 import { Outlet, Link } from 'react-router-dom'
 import { Home, LogOut } from 'lucide-react'
+import { setUserSignOut } from '../utils/redux/authSlice'
+import { useDispatch } from 'react-redux'
 
 const NavbarLayout = () => {
+  const dispatch = useDispatch()
   return (
     <div className="h-screen flex flex-col">
       <nav className="bg-white shadow-md">
@@ -23,7 +26,7 @@ const NavbarLayout = () => {
               </Link>
               <button 
                 className="ml-4 flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 transition duration-150 ease-in-out"
-                onClick={() => console.log('Logout clicked')}
+                onClick={() => dispatch(setUserSignOut())}
               >
                 <LogOut className="h-5 w-5 mr-1" />
                 Logout

@@ -15,10 +15,11 @@ const Signup = () => {
     const handleSubmit = async(e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${backendUrl}/users`, {
+            const response = await axios.post(`${backendUrl}/users/`, {
                 name,
                 email,
                 username,
+                password
         })
             console.log("User created:", response.data);
             navigate('/signin')
