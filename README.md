@@ -21,7 +21,7 @@ QuickLeave is a comprehensive leave tracking and approval system designed to str
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/quickleave.git
+   git clone https://github.com/fauzudheen/QuickLeave-Leave_application_tracking_system.git
    cd quickleave/server
    ```
 
@@ -104,9 +104,5 @@ QuickLeave is a comprehensive leave tracking and approval system designed to str
 4. **Manager not seeing leave requests**
    - Confirm that the manager's account has the correct permissions
    - Verify that employees are selecting the correct manager when submitting requests
-
-5. **Email notifications not working**
-   - Check email configuration in the backend settings
-   - Ensure the email service (e.g., SMTP server) is running and accessible
 
 For any other issues, please check the application logs or create an issue in the GitHub repository.
