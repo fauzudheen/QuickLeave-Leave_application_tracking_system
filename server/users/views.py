@@ -54,7 +54,6 @@ class ApplicationList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-
 class ApplicationDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Application.objects.all()
     serializer_class = serializers.ApplicationSerializer
