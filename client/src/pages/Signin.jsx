@@ -34,7 +34,7 @@ const Signin = () => {
     return (
         <div className="w-full min-h-screen flex flex-col justify-center items-center bg-gradient-to-l from-teal-400 via-cyan-400 to-blue-400 p-4">
             <div className="absolute top-4 left-4 flex items-center gap-2 text-white font-bold text-xl sm:text-2xl md:text-3xl">
-                <img src="/src/assets/fav-rounded.png" className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full" alt="Logo" />
+                <img src="/fav-rounded.png" className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full" alt="Logo" />
                 <h2>QuickLeave</h2>
             </div>
             <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-lg flex flex-col w-full max-w-md">

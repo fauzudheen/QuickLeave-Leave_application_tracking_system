@@ -12,7 +12,7 @@ const NavbarLayout = () => {
           <div className="flex justify-between h-16">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
-                <img src="/src/assets/fav-rounded.png" className="h-10 w-10 rounded-full" alt="Logo" />
+                <img src="/fav-rounded.png" className="h-10 w-10 rounded-full" alt="Logo" />
                 <span className="ml-2 text-xl font-bold text-gray-800">QuickLeave</span>
               </Link>
             </div>
