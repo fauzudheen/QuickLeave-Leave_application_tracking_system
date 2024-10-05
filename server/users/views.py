@@ -10,9 +10,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 
 class UserList(generics.ListCreateAPIView):
-    queryset = models.User.objects.all()
-    serializer_class = serializers.UserSerializer
+    serializer_class = serializers.UserSerializer 
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return models.User.objects.exclude(id=self.request.user.id)
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
