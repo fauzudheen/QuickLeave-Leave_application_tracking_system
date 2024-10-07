@@ -48,6 +48,7 @@ const Signin = () => {
                         placeholder="johndoe123" 
                         className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent" 
                         value={username}
+                        required
                         onChange={(e) => setUsername(e.target.value)}
                     />
                 </div>
@@ -61,6 +62,7 @@ const Signin = () => {
                             placeholder="••••••••" 
                             className="w-full p-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:border-transparent" 
                             value={password}
+                            required
                             onChange={(e) => setPassword(e.target.value)}
                         />
                         <button 
