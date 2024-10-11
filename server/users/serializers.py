@@ -46,10 +46,13 @@ class ApplicationSerializer(serializers.ModelSerializer):
         validated_data['status'] = 'Pending'
         return super().create(validated_data)
     
-class TotalLeaveReportSerializer(serializers.Serializer):
-    employee_name = serializers.CharField()
+class LeaveTypeSerializer(serializers.Serializer): 
     leave_type = serializers.CharField()
     total_days = serializers.IntegerField()
     pending_days = serializers.IntegerField()
     approved_days = serializers.IntegerField()
     rejected_days = serializers.IntegerField()
+    
+class TotalLeaveReportSerializer(serializers.Serializer):
+    employee_name = serializers.CharField()
+    leave_types = LeaveTypeSerializer(many=True)

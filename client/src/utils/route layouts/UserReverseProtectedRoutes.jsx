@@ -7,9 +7,7 @@ const UserReverseProtectedRoutes = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log("Checking isAuthenticated in UserReverseProtectedRoutes:", isAuthenticated);
     if (isAuthenticated) {
-      console.log('User is authenticated, navigating to /');
       navigate('/');
     }
   }, [isAuthenticated, navigate]);

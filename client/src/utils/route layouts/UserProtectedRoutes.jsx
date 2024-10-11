@@ -13,7 +13,6 @@ const UserProtectedRoutes = () => {
 
   const updateToken = useCallback(async () => {
     console.log("updateToken triggered");
-    console.log("Refresh Token:", refreshToken);
 
     try {
       const response = await axios.post(`${backendUrl}/token/refresh/`, { refresh: refreshToken });
@@ -30,13 +29,24 @@ const UserProtectedRoutes = () => {
     }
   }, [refreshToken, dispatch, navigate]);
 
+  const verifyToken = async () => {
+    try {
+      const response = await axios.post(`${backendUrl}/token/verify/`, { token: refreshToken });
+      if (response.status === 200) {
+        return
+      } else {
+        console.error('Failed to verify token:', response.data);
+        updateToken();
+      }
+    } catch (error) {
+      console.error('Failed to verify token:', error);
+    }
+  };
+
   useEffect(() => {
-    console.log('isAuthenticated check:', isAuthenticated);
     if (isAuthenticated) {
-      console.log('User authenticated, updating token.');
-      updateToken();
+      verifyToken();
     } else {
-      console.log('User not authenticated, navigating to /signin');
       navigate('/signin');
     }
   }, [isAuthenticated, navigate]);
@@ -44,13 +54,11 @@ const UserProtectedRoutes = () => {
   useEffect(() => {
     let interval;
     if (isAuthenticated) {
-      console.log('Setting up token refresh interval.');
       interval = setInterval(updateToken, 110 * 60 * 1000); // 110 minutes
     }
 
     return () => {
       if (interval) {
-        console.log('Clearing token refresh interval.');
         clearInterval(interval);
       }
     };

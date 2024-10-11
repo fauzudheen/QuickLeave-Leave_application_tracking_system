@@ -8,13 +8,14 @@ from django.contrib.auth import authenticate
 from rest_framework_simplejwt.views import TokenRefreshView
 from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
+from django.db.models import F, Sum, Case, When, IntegerField
 
 class UserList(generics.ListCreateAPIView):
     serializer_class = serializers.UserSerializer 
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return models.User.objects.exclude(id=self.request.user.id)
+
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.User.objects.all()
     serializer_class = serializers.UserSerializer
@@ -68,44 +69,43 @@ class SubordinateApplicationsList(generics.ListAPIView):
     def get_queryset(self):
         return models.Application.objects.filter(manager=self.request.user)
     
+
 class TotalLeaveReport(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        manager = request.user
 
-        manager_applications = models.Application.objects.filter(manager=manager)
-
-        current_year = timezone.now().year
-
-        leave_data = []
-        subordinates = set(manager_applications.values_list('user', flat=True))
-
-        for subordinate_id in subordinates:
-            subordinate = models.User.objects.get(id=subordinate_id)
-            applications = manager_applications.filter(
-                user=subordinate,
-                start_date__year=current_year
+        applications  = models.Application.objects.filter(
+            manager=request.user, 
+            start_date__year=timezone.now().year,
             )
+        
+        users = applications.values('user__id', 'user__name').order_by('user__id').distinct('user__id')
 
-            leave_types = applications.values('leave_type').distinct()
+        result = []
 
+        for user in users:
+            user_leaves = applications.filter(user__id=user['user__id'])
+            
+            # Get unique leave types for this user
+            leave_types = user_leaves.values_list('leave_type', flat=True).distinct()
+            
+            leave_type_data = []
             for leave_type in leave_types:
-                leave_type_applications = applications.filter(leave_type=leave_type['leave_type'])
+                type_applications = user_leaves.filter(leave_type=leave_type)
                 
-                total_days = sum((app.end_date - app.start_date).days + 1 for app in leave_type_applications)
-                pending_days = sum((app.end_date - app.start_date).days + 1 for app in leave_type_applications.filter(status='Pending'))
-                approved_days = sum((app.end_date - app.start_date).days + 1 for app in leave_type_applications.filter(status='Approved'))
-                rejected_days = sum((app.end_date - app.start_date).days + 1 for app in leave_type_applications.filter(status='Rejected'))
-
-                leave_data.append({
-                    'employee_name': subordinate.name,
-                    'leave_type': leave_type['leave_type'],
-                    'total_days': total_days,
-                    'pending_days': pending_days,
-                    'approved_days': approved_days,
-                    'rejected_days': rejected_days
+                leave_type_data.append({
+                    'leave_type': leave_type,
+                    'total_days': sum((app.end_date - app.start_date).days + 1 for app in type_applications),
+                    'pending_days': sum((app.end_date - app.start_date).days + 1 for app in type_applications if app.status == 'Pending'),
+                    'approved_days': sum((app.end_date - app.start_date).days + 1 for app in type_applications if app.status == 'Approved'),
+                    'rejected_days': sum((app.end_date - app.start_date).days + 1 for app in type_applications if app.status == 'Rejected')
                 })
+            
+            result.append({
+                'employee_name': user['user__name'],
+                'leave_types': leave_type_data
+            })
 
-        serializer = serializers.TotalLeaveReportSerializer(leave_data, many=True)
+        serializer = serializers.TotalLeaveReportSerializer(result, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

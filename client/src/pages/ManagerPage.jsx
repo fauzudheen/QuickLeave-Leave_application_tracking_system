@@ -99,7 +99,7 @@ const ManagerPage = () => {
   const [leaveApplications, setLeaveApplications] = useState([]);
   const [totalLeavesReport, setTotalLeavesReport] = useState([]);
   const [openSections, setOpenSections] = useState({
-    applications: true,
+    applications: false,
     report: false
   });
   const [confirmDialog, setConfirmDialog] = useState({
@@ -287,42 +287,62 @@ const ManagerPage = () => {
       </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <SectionToggle title="Total Leaves Report" section="report" />
-        {openSections.report && (
-          <div className="p-6">
-            {totalLeavesReport.length === 0 ? (
-              <p className="text-gray-600">No leave data available.</p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full bg-white">
-                  <thead className="bg-cyan-100">
-                    <tr>
-                      <th className="py-2 px-4 border-b text-left">Employee</th>
-                      <th className="py-2 px-4 border-b text-left">Leave Type</th>
-                      <th className="py-2 px-4 border-b text-left">Total Days</th>
-                      <th className="py-2 px-4 border-b text-left">Pending</th>
-                      <th className="py-2 px-4 border-b text-left">Approved</th>
-                      <th className="py-2 px-4 border-b text-left">Rejected</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {totalLeavesReport.map((report, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                        <td className="py-2 px-4 border-b">{report.employee_name}</td>
-                        <td className="py-2 px-4 border-b">{report.leave_type                        }</td>
-                        <td className="py-2 px-4 border-b">{report.total_days}</td>
-                        <td className="py-2 px-4 border-b">{report.pending_days}</td>
-                        <td className="py-2 px-4 border-b">{report.approved_days}</td>
-                        <td className="py-2 px-4 border-b">{report.rejected_days}</td>
+      <SectionToggle title="Total Leaves Report" section="report" />
+      {openSections.report && (
+        <div className="p-6">
+          {totalLeavesReport.length === 0 ? (
+            <p className="text-gray-600">No leave data available.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white">
+                <thead className="bg-cyan-100">
+                  <tr>
+                    <th className="py-2 px-4 border-b text-left">Sl No.</th>
+                    <th className="py-2 px-4 border-b text-left">Employee</th>
+                    <th className="py-2 px-4 border-b text-left">Leave Type</th>
+                    <th className="py-2 px-4 border-b text-left">Total Days</th>
+                    <th className="py-2 px-4 border-b text-left">Pending</th>
+                    <th className="py-2 px-4 border-b text-left">Approved</th>
+                    <th className="py-2 px-4 border-b text-left">Rejected</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {totalLeavesReport.map((employee, employeeIndex) => (
+                    employee.leave_types.map((leaveType, leaveIndex) => (
+                      <tr 
+                        key={`${employee.employee_name}-${leaveType.leave_type}`}
+                        className={leaveIndex % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                      >
+                        {leaveIndex === 0 ? (
+                          <>
+                          <td className="py-2 px-4 border-b bg-white font-bold" 
+                            rowSpan={employee.leave_types.length}
+                          >
+                            {employeeIndex + 1}.
+                          </td>
+                          <td 
+                            className="py-2 px-4 border bg-white font-bold"
+                            rowSpan={employee.leave_types.length}
+                          >
+                            {employee.employee_name}
+                          </td>
+                          </>
+                        ) : null}
+                        <td className="py-2 px-4 border-b">{leaveType.leave_type}</td>
+                        <td className="py-2 px-4 border-b">{leaveType.total_days}</td>
+                        <td className="py-2 px-4 border-b">{leaveType.pending_days}</td>
+                        <td className="py-2 px-4 border-b">{leaveType.approved_days}</td>
+                        <td className="py-2 px-4 border-b">{leaveType.rejected_days}</td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                    ))
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
 
       <ConfirmationModal
         isOpen={confirmDialog.isOpen}
