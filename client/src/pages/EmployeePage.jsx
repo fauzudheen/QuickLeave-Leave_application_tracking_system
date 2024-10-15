@@ -1,9 +1,66 @@
 import { useEffect, useState } from 'react';
-import { Calendar, FileText, Send, Check, X } from 'lucide-react';
+import { Calendar, FileText, Send, Check, X, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { backendUrl } from '../utils/const';
 import createAxiosInstance from '../utils/api/axiosInstance';
 import { createPortal } from 'react-dom';
+
+
+
+const ConfirmationModal = ({ isOpen, onClose, title, description, onConfirm, application }) => {
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose}></div>
+        <span className="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
+        <div className="inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="sm:flex sm:items-start">
+              <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                <AlertCircle className="h-6 w-6 text-blue-600" />
+              </div>
+              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{title}</h3>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-500">{description}</p>
+                  {application && (
+                    <div className="mt-3 bg-gray-50 p-3 rounded-md">
+                      <p className="text-sm font-medium text-gray-900">{application.user.name}</p>
+                      <p className="text-sm text-gray-600">{application.leave_type} Leave</p>
+                      <p className="text-sm text-gray-600">
+                        <Calendar className="inline w-4 h-4 mr-1" />
+                        {application.start_date} to {application.end_date}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <button
+              type="button"
+              className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={onConfirm}
+            >
+              Confirm
+            </button>
+            <button
+              type="button"
+              className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
 
 const Toast = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -67,6 +124,11 @@ const EmployeePage = () => {
     show: false,
     message: '',
     type: 'success'
+  });
+  const [confirmDialog, setConfirmDialog] = useState({
+    isOpen: false,
+    application: null,
+    action: null
   });
 
   useEffect(() => {
@@ -248,11 +310,33 @@ const EmployeePage = () => {
     try {
       await axiosInstance.delete(`${backendUrl}/applications/${applicationId}/`);
       setLeaveApplications(prevApplications => prevApplications.filter(app => app.id !== applicationId));
-      showToast('Leave application deleted successfully!', 'success');
+      showToast('Leave application withdrawn successfully!', 'success');
     } catch (error) {
       console.error('Error deleting leave application:', error);
       showToast('Failed to delete leave application. Please try again.', 'error');
     }
+  };
+
+  const openConfirmDialog = (application, action) => {
+    setConfirmDialog({
+      isOpen: true,
+      application,
+      action
+    });
+  };
+
+  const closeConfirmDialog = () => {
+    setConfirmDialog({
+      isOpen: false,
+      application: null,
+      action: null
+    });
+  };
+
+  const handleConfirm = () => {
+    const { application } = confirmDialog;
+    deleteApplication(application.id);
+    closeConfirmDialog();
   };
 
   return (
@@ -366,25 +450,43 @@ const EmployeePage = () => {
           ) : (
             <ul className="space-y-4">
               {leaveApplications.map((application) => (
-                <li key={application.id} className="bg-gray-100 rounded-lg p-4 shadow-lg">
+                <li key={application.id} className="bg-gray-100 rounded-lg p-4 shadow-lg mb-4">
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="text-lg font-medium text-cyan-800">{application.leave_type} Leave</p>
-                      <p className="text-sm text-gray-600">{new Date(application.start_date).toLocaleDateString()} to {new Date(application.end_date).toLocaleDateString()}</p>
-                      <p className="text-sm text-gray-600">Status: {application.status}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(application.start_date).toLocaleDateString()} to {new Date(application.end_date).toLocaleDateString()}
+                      </p>
+                      <p className={`text-sm font-medium ${
+                        application.status === 'Approved' ? 'text-green-600' :
+                        application.status === 'Rejected' ? 'text-red-600' :
+                        application.status === 'Pending' ? 'text-yellow-600' :
+                        'text-gray-600'
+                      }`}>
+                        Status: {application.status}
+                      </p>
                     </div>
-                    <button
-                      onClick={() => deleteApplication(application.id)}
-                      className="bg-red-600 text-white p-2 rounded-lg shadow hover:bg-red-700 transition duration-300"
-                    >
-                      Delete
-                    </button>
+                    {application.status === 'Pending' && (
+                      <button
+                        onClick={() => openConfirmDialog(application, 'withdraw')}
+                        className="bg-red-600 text-white text-sm font-medium p-2 rounded-lg shadow hover:bg-red-700 transition duration-300"
+                      >
+                        Withdraw
+                      </button>
+                    )}
                   </div>
-                  <p className="mt-2 text-gray-700">{application.reason}</p>
                 </li>
               ))}
             </ul>
           )}
+          <ConfirmationModal
+            isOpen={confirmDialog.isOpen}
+            onClose={closeConfirmDialog}
+            title={`Confirm ${confirmDialog.action}`}
+            description={`Are you sure you want to ${confirmDialog.action} this leave application?`}
+            onConfirm={handleConfirm}
+            application={confirmDialog.application}
+          />
         </div>
       </div>
 
